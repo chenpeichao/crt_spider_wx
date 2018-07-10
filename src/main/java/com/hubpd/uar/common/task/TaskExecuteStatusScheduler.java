@@ -16,7 +16,9 @@ public class TaskExecuteStatusScheduler {
     @Autowired
     private GsdataService gsdataService;
 
-    @Scheduled(fixedRate=1000*60*15)
+    //每小时执行一次
+    @Scheduled(cron="0 0 */1 * * ?")
+//    @Scheduled(fixedRate=1000*60)
     public void updateTaskFinishStatus() {
         gsdataService.execute();
     }

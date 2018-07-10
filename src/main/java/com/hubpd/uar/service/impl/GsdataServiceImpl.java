@@ -113,7 +113,7 @@ public class GsdataServiceImpl implements GsdataService {
                 int pageNo = 1;
                 while (true) {
                     List<WxUrlMonitorResult> results = new ArrayList<WxUrlMonitorResult>();
-                    // 获取数据
+                    // 获取公众号文章数据
                     try {
                         results = DataApi.getInstance().getResponseData(pageNo,
                                 gsdataNickNameId,
@@ -154,30 +154,31 @@ public class GsdataServiceImpl implements GsdataService {
                             newEntity.setVideourl(wxUrlMonitorResult.getVideoUrl());
                             newEntity.setImgsurl(wxUrlMonitorResult.getImgsUrl());
 
-                            //用于根据文章url获取文章的正文html格式
-                            List<String> urlList = new ArrayList<String>();
-                            urlList.add(wxUrlMonitorResult.getUrl());
-                            String str = DataApi.getInstance().getWeixinContentByUrls(urlList);
+
 
                             try {
-                                JSONObject jsonObject = new JSONObject(str);
-                                JSONArray articleListArray = jsonObject.getJSONArray("returnData");
-                                if(articleListArray.length() > 0) {
-                                    results = new ArrayList();
-
-                                    for (int i = 0; i < articleListArray.length(); ++i) {
-                                        JSONObject returnData = (JSONObject) articleListArray.get(i);
-                                        if (returnData.has("content")) {
-                                            newEntity.setContent(returnData.getString("content"));
-                                        }
-                                    }
-                                }
-
                                 //从数据库中查询文章信息是否存在
                                 CbWxContent result = cbWxContentService.findOneByUrl(newEntity.getUrl());
                                 if (result != null) {
                                     continue;
                                 } else {
+                                    //用于根据文章url获取文章的正文html格式
+                                    List<String> urlList = new ArrayList<String>();
+                                    urlList.add(wxUrlMonitorResult.getUrl());
+                                    String str = DataApi.getInstance().getWeixinContentByUrls(urlList);
+                                    JSONObject jsonObject = new JSONObject(str);
+                                    JSONArray articleListArray = jsonObject.getJSONArray("returnData");
+                                    if(articleListArray.length() > 0) {
+                                        results = new ArrayList();
+
+                                        for (int i = 0; i < articleListArray.length(); ++i) {
+                                            JSONObject returnData = (JSONObject) articleListArray.get(i);
+                                            if (returnData.has("content")) {
+                                                newEntity.setContent(returnData.getString("content"));
+                                            }
+                                        }
+                                    }
+
                                     cbWxContentList.add(newEntity);
                                 }
                             } catch (JSONException e) {
@@ -202,7 +203,7 @@ public class GsdataServiceImpl implements GsdataService {
                     cbWxContentService.save(cbWxContentList);
                     logger.info("公众号【"+cbWxList.getNickname()+"("+cbWxList.getNicknameId()+")】在【"+ com.hubpd.uar.common.utils.DateUtils.parseDate2StringByPattern(DateUtils.addHours(currentHourDate, -1), "yyyy年MM月dd日")+"】抓取了【" +cbWxContentList.size()+"】篇文章");
                 } else {
-                    logger.info("公众号【"+cbWxList.getNickname()+"("+cbWxList.getNicknameId()+")】在【"+ com.hubpd.uar.common.utils.DateUtils.parseDate2StringByPattern(DateUtils.addHours(currentHourDate, -1), "yyyy年MM月dd日")+"】未抓取到文章");
+                    logger.info("公众号【"+cbWxList.getNickname()+"("+cbWxList.getNicknameId()+")】在【"+ com.hubpd.uar.common.utils.DateUtils.parseDate2StringByPattern(DateUtils.addHours(currentHourDate, -1), "yyyy年MM月dd日")+"】未抓取到新文章！");
                 }
             }
 
