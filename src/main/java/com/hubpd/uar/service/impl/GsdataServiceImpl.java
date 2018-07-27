@@ -130,18 +130,10 @@ public class GsdataServiceImpl implements GsdataService {
                             newEntity.setName(wxUrlMonitorResult.getName());        //公众号名称
                             newEntity.setWxName(wxUrlMonitorResult.getWxName());    //公众号账号
                             newEntity.setNicknameId(wxUrlMonitorResult.getNickNameId());    //公众号清博库中nickname_id
-                            newEntity.setPosttime(wxUrlMonitorResult.getPostTime());
-//                            try {
-//                                //清博中返回时间转换成内容库中识别的时间格式
-//                                newEntity.setPosttime(com.hubpd.uar.common.utils.DateUtils.parseDateStrByPattern(wxUrlMonitorResult.getPostTime(), "yyyy-MM-dd HH:mm:ss", "yyyyMMddHHmmss"));
-//                            } catch (ParseException e) {
-//                                logger.error("微信文章日期【"+wxUrlMonitorResult.getPostTime()+"】格式【yyyy-MM-dd HH:mm:ss】转换【yyyyMMddHHmmss】格式错误！！", e);
-//                            }
+                            newEntity.setPosttime(wxUrlMonitorResult.getPostTime());    //yyyy-MM-dd HH:mm:ss
                             newEntity.setTitle(wxUrlMonitorResult.getTitle());
-//                            newEntity.setContent(wxUrlMonitorResult.getContent());
                             newEntity.setContentPureWord(wxUrlMonitorResult.getContent());
                             newEntity.setUrl(wxUrlMonitorResult.getUrl());
-//                            newEntity.setAddTime(wxUrlMonitorResult.getAddTime());
                             newEntity.setMonitorTime(wxUrlMonitorResult.getMonitorTime());
                             newEntity.setReadnum(wxUrlMonitorResult.getReadNum());
                             newEntity.setLikenum(wxUrlMonitorResult.getLikeNum());
@@ -199,7 +191,7 @@ public class GsdataServiceImpl implements GsdataService {
 
                 //每个公众号的文章批量保存
                 Date currentHourDate = new Date();
-                if(cbWxContentList.size() > 1) {
+                if(cbWxContentList.size() > 0) {
                     cbWxContentService.save(cbWxContentList);
                     logger.info("公众号【"+cbWxList.getNickname()+"("+cbWxList.getNicknameId()+")】在【"+ com.hubpd.uar.common.utils.DateUtils.parseDate2StringByPattern(DateUtils.addHours(currentHourDate, -1), "yyyy年MM月dd日")+"】抓取了【" +cbWxContentList.size()+"】篇文章");
                 } else {
