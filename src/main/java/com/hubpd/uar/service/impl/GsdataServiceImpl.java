@@ -190,12 +190,11 @@ public class GsdataServiceImpl implements GsdataService {
                 }
 
                 //每个公众号的文章批量保存
-                Date currentHourDate = new Date();
                 if(cbWxContentList.size() > 0) {
                     cbWxContentService.save(cbWxContentList);
-                    logger.info("公众号【"+cbWxList.getNickname()+"("+cbWxList.getNicknameId()+")】在【"+ com.hubpd.uar.common.utils.DateUtils.parseDate2StringByPattern(DateUtils.addHours(currentHourDate, -1), "yyyy年MM月dd日")+"】抓取了【" +cbWxContentList.size()+"】篇文章");
+                    logger.info("公众号【"+cbWxList.getNickname()+"("+cbWxList.getNicknameId()+")】在【"+ com.hubpd.uar.common.utils.DateUtils.parseDate2StringByPattern(DateUtils.addHours(date, 0), "yyyy年MM月dd日")+"】抓取了【" +cbWxContentList.size()+"】篇文章");
                 } else {
-                    logger.info("公众号【"+cbWxList.getNickname()+"("+cbWxList.getNicknameId()+")】在【"+ com.hubpd.uar.common.utils.DateUtils.parseDate2StringByPattern(DateUtils.addHours(currentHourDate, -1), "yyyy年MM月dd日")+"】未抓取到新文章！");
+                    logger.info("公众号【"+cbWxList.getNickname()+"("+cbWxList.getNicknameId()+")】在【"+ com.hubpd.uar.common.utils.DateUtils.parseDate2StringByPattern(DateUtils.addHours(date, 0), "yyyy年MM月dd日")+"】未抓取到新文章！");
                 }
             }
 
@@ -214,23 +213,26 @@ public class GsdataServiceImpl implements GsdataService {
         try {
             if (StringUtils.isBlank(cbWxList.getGsdataNicknameId()) && StringUtils.isNotBlank(cbWxList.getNewsUrl())) {
 
+
                 // 1.1、获取查询的nickname_id
                 ResNickNameOneResult resNickNameOneResult = DataApi.getInstance().getNickNameOne(cbWxList.getNicknameId());
 
-                if (resNickNameOneResult == null || resNickNameOneResult.getId() < 0) {
-                    // 1.2、未获取到nickname_id
-                    // 1.2.1将公众号添加到清博中人民日报的监控组中
+                if(cbWxList.getGsdataNicknameId() == null && resNickNameOneResult != null) {
+                    // 1.1.1将公众号添加到清博中人民日报的监控组中
                     GroupMonitorAddResult groupMonitorAddResult = DataApi.getInstance().addWeixin2Group(cbWxList.getNewsUrl());
                     if (groupMonitorAddResult == null || groupMonitorAddResult.getWxNickname() == null) {
-                        // 1.2.1.1、添加到清博组失败，则直接放回清博nickname_id为null
+                        // 1.1.1.1、添加到清博组失败，则直接放回清博nickname_id为null
                         return gsdataNickNameId;
                     }
+                }
 
-                    // 1.2.2、添加组成功的话，再从清博接口中获取一次清博库中公众号信息
+                if (resNickNameOneResult == null || resNickNameOneResult.getId() < 0) {
+                    // 1.2、未获取到nickname_id
+                    // 1.2.1、添加组成功的话，再从清博接口中获取一次清博库中公众号信息
                     resNickNameOneResult = DataApi.getInstance().getNickNameOne(cbWxList.getNicknameId());
 
                     if (resNickNameOneResult == null || resNickNameOneResult.getId() < 0) {
-                        //1.2.2.1、清博中公众号的信息获取失败，则直接返回清博nickname_id为null
+                        //1.2.1.1、清博中公众号的信息获取失败，则直接返回清博nickname_id为null
                         return gsdataNickNameId;
 
                     }

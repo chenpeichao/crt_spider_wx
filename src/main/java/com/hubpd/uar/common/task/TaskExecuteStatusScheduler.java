@@ -20,8 +20,8 @@ public class TaskExecuteStatusScheduler {
     private GsdataService gsdataService;
 
     //每整点执行一次
-    @Scheduled(cron="0 0 * * * ?")
-//    @Scheduled(fixedRate=1000*60*50)
+//    @Scheduled(cron="0 0 * * * ?")
+    @Scheduled(fixedRate=1000*60*50)
     public void updateTaskFinishStatus() {
         gsdataService.execute();
     }
