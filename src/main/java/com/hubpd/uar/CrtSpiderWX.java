@@ -24,15 +24,4 @@ public class CrtSpiderWX {
         SpringApplication springApplication = new SpringApplication(CrtSpiderWX.class);
         springApplication.run(args);
     }
-
-    //定时任务中的线程池
-    @Bean
-    public TaskScheduler taskScheduler() {
-        ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
-        //设置线程池大小
-        taskScheduler.setPoolSize(5);
-        //线程名字前缀
-        taskScheduler.setThreadNamePrefix("CrtSpiderWX-Thread-Pool");
-        return taskScheduler;
-    }
 }

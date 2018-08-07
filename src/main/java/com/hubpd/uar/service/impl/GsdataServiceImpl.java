@@ -171,7 +171,6 @@ public class GsdataServiceImpl implements GsdataService {
                                 }
                             } catch (JSONException e) {
                                 logger.error("文章html格式获取失败！【"+wxUrlMonitorResult.getUrl()+"】：", e);
-                                e.printStackTrace();
                             }
 
                         }

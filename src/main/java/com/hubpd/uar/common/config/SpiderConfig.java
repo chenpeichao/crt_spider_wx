@@ -21,12 +21,10 @@ public class SpiderConfig {
     public static String SPIDER_START_DAY;
     /** 指定查询周期的结束时间 */
     public static String SPIDER_END_DAY;
+
+
     /** 核心线程数 */
     public static Integer THREAD_CORE_NUM;
-    /** 最大运行线程数 */
-    public static Integer THREAD_MAX_NUM;
-    /** 队列数 */
-    public static Integer THREAD_QUEUE_NUM;
 
 
     @Value("${spider_catch_is_appoint}")
@@ -61,15 +59,5 @@ public class SpiderConfig {
     @Value("${thread_core_num}")
     public void setThreadCoreNum(Integer threadCoreNum) {
         this.THREAD_CORE_NUM = threadCoreNum;
-    }
-
-    @Value("${thread_max_num}")
-    public void setThreadMaxNum(Integer threadMaxNum) {
-        this.THREAD_MAX_NUM = threadMaxNum;
-    }
-
-    @Value("${thread_queue_num}")
-    public void setThreadQueueNum(Integer threadQueueNum) {
-        this.THREAD_QUEUE_NUM = threadQueueNum;
     }
 }
