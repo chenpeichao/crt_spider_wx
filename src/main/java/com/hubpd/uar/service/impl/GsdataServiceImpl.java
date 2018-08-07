@@ -93,9 +93,10 @@ public class GsdataServiceImpl implements GsdataService {
                 endDay = DateUtils.parseDate(SpiderConfig.SPIDER_END_DAY, new String[]{"yyyy-MM-dd"});
             } catch (ParseException e) {
                 logger.error("日期格式错误请重新查看！！", e);
+                return ;
                 //当日期格式有问题时，日期设置默认设置当天时间
-                startDay = new Date();
-                endDay = startDay;
+//                startDay = new Date();
+//                endDay = startDay;
             }
         }
         //用于日期流转变化的日期标识
@@ -211,47 +212,42 @@ public class GsdataServiceImpl implements GsdataService {
     private String getGsdataNickNameId(CbWxList cbWxList) {
         String gsdataNickNameId = null;
         try {
-            if (StringUtils.isBlank(cbWxList.getGsdataNicknameId()) && StringUtils.isNotBlank(cbWxList.getNewsUrl())) {
-
-
-                // 1.1、获取查询的nickname_id
-                ResNickNameOneResult resNickNameOneResult = DataApi.getInstance().getNickNameOne(cbWxList.getNicknameId());
-
-                if(cbWxList.getGsdataNicknameId() == null && resNickNameOneResult != null) {
-                    // 1.1.1将公众号添加到清博中人民日报的监控组中
+            //1.1、首先从数据库中获取清博中存储的公众号id
+            if(StringUtils.isBlank(cbWxList.getGsdataNicknameId())) {
+                //不存在
+                //1.2、判断数据库中存储的公众号信息以及url信息是否存在
+                if(StringUtils.isNotBlank(cbWxList.getNicknameId()) && StringUtils.isNotBlank(cbWxList.getNewsUrl())) {
+                    //信息正常
+                    //1.3、将此公众号添加到清博监控中
                     GroupMonitorAddResult groupMonitorAddResult = DataApi.getInstance().addWeixin2Group(cbWxList.getNewsUrl());
                     if (groupMonitorAddResult == null || groupMonitorAddResult.getWxNickname() == null) {
-                        // 1.1.1.1、添加到清博组失败，则直接放回清博nickname_id为null
-                        return gsdataNickNameId;
+                        // 1.4.1、添加到清博组失败，则直接放回清博nickname_id为null
+                        logger.error("添加到清博组监控失败，公众号为【"+cbWxList.getNicknameId()+"】:" + groupMonitorAddResult.getErrmsg());
+                        return null;
+                    } else {
+                        // 1.4.2、添加清博监控成功
+                        // 1.4.2.1、添加组成功的话，再从清博接口中获取一次清博库中公众号信息
+                        ResNickNameOneResult resNickNameOneResult = DataApi.getInstance().getNickNameOne(cbWxList.getNicknameId());
+                        // 设置对象
+                        //1.4.2.2、清博中公众号的信息获取成功,保存清博库中公众号的nickname_id信息到cbWxList对象
+                        cbWxList.setGsdataNicknameId(String.valueOf(resNickNameOneResult.getId()));
+                        // 保存公众号信息到数据库
+                        cbWxListService.update(cbWxList);
+                        return String.valueOf(resNickNameOneResult.getId());
                     }
-                }
-
-                if (resNickNameOneResult == null || resNickNameOneResult.getId() < 0) {
-                    // 1.2、未获取到nickname_id
-                    // 1.2.1、添加组成功的话，再从清博接口中获取一次清博库中公众号信息
-                    resNickNameOneResult = DataApi.getInstance().getNickNameOne(cbWxList.getNicknameId());
-
-                    if (resNickNameOneResult == null || resNickNameOneResult.getId() < 0) {
-                        //1.2.1.1、清博中公众号的信息获取失败，则直接返回清博nickname_id为null
-                        return gsdataNickNameId;
-
-                    }
-                    // 设置对象
-                    //1.2.2.2、清博中公众号的信息获取成功,保存清博库中公众号的nickname_id信息到cbWxList对象
-                    cbWxList.setGsdataNicknameId(String.valueOf(resNickNameOneResult.getId()));
-
                 } else {
-                    // 1.3、获取清博接口中的公众号nickname_id成功，保存清博库中公众号的nickname_id信息到cbWxList对象
-                    cbWxList.setGsdataNicknameId(String.valueOf(resNickNameOneResult.getId()));
+                    //信息不正常
+                    logger.error("数据库中存储待抓取公众号的信息错误id为【"+cbWxList.getId()+"】");
+                    return null;
                 }
-
-                // 保存数据到数据库
-                cbWxListService.update(cbWxList);
+            } else {
+                //存在，直接返回
+                return cbWxList.getGsdataNicknameId();
             }
         } catch (Exception ex) {
             logger.error("微信id为【"+cbWxList.getNicknameId()+"】的获取清博库nicknameId异常", ex);
+        } finally {
+            return null;
         }
-        //对清博中的nickname_id信息进行返回
-        return cbWxList.getGsdataNicknameId();
     }
 }
