@@ -32,4 +32,14 @@ public class DateUtils {
     public static String parseDate2StringByPattern(Date sourceDate, String pattern) {
         return new SimpleDateFormat(pattern).format(sourceDate);
     }
+
+    /**
+     * 将日期转换为指定格式的日期字符串
+     * @param sourceDataStr         带转换日期字符串
+     * @param pattern               日期字符串转换后期望的格式
+     * @return
+     */
+    public static Date parseDateStr2DateByPattern(String sourceDataStr, String pattern) throws ParseException {
+        return new SimpleDateFormat(pattern).parse(sourceDataStr);
+    }
 }

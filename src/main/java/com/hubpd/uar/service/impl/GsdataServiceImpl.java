@@ -1,7 +1,6 @@
 package com.hubpd.uar.service.impl;
 
 import com.hubpd.uar.common.config.SpiderConfig;
-import com.hubpd.uar.common.utils.Md5Utils;
 import com.hubpd.uar.domain.CbWxContent;
 import com.hubpd.uar.domain.CbWxList;
 import com.hubpd.uar.service.CbWxContentService;
@@ -26,7 +25,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * 清博接口数据获取实现类
@@ -89,14 +87,11 @@ public class GsdataServiceImpl implements GsdataService {
         //2、查询对于日期周期是否进行判断--进行设置了，对于开始时间和结束时间进行设置
         if(SpiderConfig.SPIDER_DATA_IS_SET == 1) {
             try {
-                startDay = DateUtils.parseDate(SpiderConfig.SPIDER_START_DAY, new String[]{"yyyy-MM-dd"});
-                endDay = DateUtils.parseDate(SpiderConfig.SPIDER_END_DAY, new String[]{"yyyy-MM-dd"});
+                startDay = com.hubpd.uar.common.utils.DateUtils.parseDateStr2DateByPattern(SpiderConfig.SPIDER_START_DAY, "yyyy-MM-dd");
+                endDay = com.hubpd.uar.common.utils.DateUtils.parseDateStr2DateByPattern(SpiderConfig.SPIDER_END_DAY, "yyyy-MM-dd");
             } catch (ParseException e) {
                 logger.error("日期格式错误请重新查看！！", e);
                 return ;
-                //当日期格式有问题时，日期设置默认设置当天时间
-//                startDay = new Date();
-//                endDay = startDay;
             }
         }
         //用于日期流转变化的日期标识
@@ -223,7 +218,7 @@ public class GsdataServiceImpl implements GsdataService {
                     if (groupMonitorAddResult == null || groupMonitorAddResult.getWxNickname() == null) {
                         // 1.4.1、添加到清博组失败，则直接放回清博nickname_id为null
                         logger.error("添加到清博组监控失败，公众号为【"+cbWxList.getNicknameId()+"】:" + groupMonitorAddResult.getErrmsg());
-                        return null;
+                        gsdataNickNameId = null;
                     } else {
                         // 1.4.2、添加清博监控成功
                         // 1.4.2.1、添加组成功的话，再从清博接口中获取一次清博库中公众号信息
@@ -233,21 +228,22 @@ public class GsdataServiceImpl implements GsdataService {
                         cbWxList.setGsdataNicknameId(String.valueOf(resNickNameOneResult.getId()));
                         // 保存公众号信息到数据库
                         cbWxListService.update(cbWxList);
-                        return String.valueOf(resNickNameOneResult.getId());
+                        gsdataNickNameId = String.valueOf(resNickNameOneResult.getId());
                     }
                 } else {
                     //信息不正常
                     logger.error("数据库中存储待抓取公众号的信息错误id为【"+cbWxList.getId()+"】");
-                    return null;
+                    gsdataNickNameId = null;
                 }
             } else {
                 //存在，直接返回
-                return cbWxList.getGsdataNicknameId();
+                gsdataNickNameId = cbWxList.getGsdataNicknameId();
             }
         } catch (Exception ex) {
+            gsdataNickNameId = null;
             logger.error("微信id为【"+cbWxList.getNicknameId()+"】的获取清博库nicknameId异常", ex);
         } finally {
-            return null;
+            return gsdataNickNameId;
         }
     }
 }
