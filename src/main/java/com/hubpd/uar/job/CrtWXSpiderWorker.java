@@ -146,9 +146,9 @@ public class CrtWXSpiderWorker implements Runnable {
                         //每个公众号的文章批量保存
                         if(cbWxContentList.size() > 0) {
                             cbWxContentService.save(cbWxContentList);
-                            logger.info("公众号【"+cbWxList.getNickname()+"("+cbWxList.getNicknameId()+")】在【"+ com.hubpd.uar.common.utils.DateUtils.parseDate2StringByPattern(DateUtils.addHours(date, 0), "yyyy年MM月dd日")+"】抓取了【" +cbWxContentList.size()+"】篇文章");
+                            logger.info("公众号【"+cbWxList.getNickname()+"("+cbWxList.getNicknameId()+")】在【"+ com.hubpd.uar.common.utils.DateUtils.parseDate2StringByPattern(DateUtils.addHours(date, -1), "yyyy年MM月dd日HH点到")+ com.hubpd.uar.common.utils.DateUtils.parseDate2StringByPattern(DateUtils.addHours(date, 0), "yyyy年MM月dd日HH点") +"】抓取了【" +cbWxContentList.size() + "】篇文章");
                         } else {
-                            logger.info("公众号【"+cbWxList.getNickname()+"("+cbWxList.getNicknameId()+")】在【"+ com.hubpd.uar.common.utils.DateUtils.parseDate2StringByPattern(DateUtils.addHours(date, 0), "yyyy年MM月dd日")+"】未抓取到新文章！");
+                            logger.info("公众号【"+cbWxList.getNickname()+"("+cbWxList.getNicknameId()+")】在【"+ com.hubpd.uar.common.utils.DateUtils.parseDate2StringByPattern(DateUtils.addHours(date, -1), "yyyy年MM月dd日HH点到") + com.hubpd.uar.common.utils.DateUtils.parseDate2StringByPattern(DateUtils.addHours(date, 0), "yyyy年MM月dd日HH点") +"】未抓取到新文章！");
                         }
                     // 添加1天
                     date = DateUtils.addDays(date, 1);
