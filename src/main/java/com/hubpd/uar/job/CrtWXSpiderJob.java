@@ -40,14 +40,14 @@ public class CrtWXSpiderJob {
     @PostConstruct
     void init() {
         cbContentBlockingQueue = new LinkedBlockingDeque<CbWxList>();
-        for (int i = 0; i != 5; ++i) {
+        for (int i = 0; i != SpiderConfig.THREAD_CORE_NUM; ++i) {
             CrtWXSpiderWorker crtWXSpiderWorker = new CrtWXSpiderWorker(cbContentBlockingQueue, cbWxListService, cbWxContentService);
             workerExecutorService.execute(crtWXSpiderWorker);
         }
     }
 
-    @Scheduled(fixedRate = 1000*60*100)
-//    @Scheduled(cron="0 0 * * * ?")
+    //    @Scheduled(fixedRate = 1000*5)
+    @Scheduled(cron = "0 0 * * * ?")
     public void addTask() {
         logger.info("GsdataPushOriginNewsKeywordsSpider start");
         List<CbWxList> gsDataCbWxListList = new ArrayList<CbWxList>();

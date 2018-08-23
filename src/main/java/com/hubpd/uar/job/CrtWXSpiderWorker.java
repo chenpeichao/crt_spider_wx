@@ -9,6 +9,7 @@ import iims.crt.gsdata.DataApi;
 import iims.crt.gsdata.GroupMonitorAddResult;
 import iims.crt.gsdata.ResNickNameOneResult;
 import iims.crt.gsdata.WxUrlMonitorResult;
+import org.apache.commons.lang.math.RandomUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
@@ -63,6 +64,7 @@ public class CrtWXSpiderWorker implements Runnable {
                 while (date.compareTo(endDay) <= 0) {
                         List<CbWxContent> cbWxContentList = new ArrayList<CbWxContent>();
                         //1、获取查询的微信id在清博库中的nickname_id
+                    Thread.currentThread().sleep(RandomUtils.nextInt(50) * 1l);
                         gsdataNickNameId = getGsdataNickNameId(cbWxList);
                         if (StringUtils.isBlank(gsdataNickNameId)) {
                             logger.error("清博接口对于微信号【"+cbWxList.getNicknameId()+":"+cbWxList.getNickname()+"】的清博nicknameId获取失败");
