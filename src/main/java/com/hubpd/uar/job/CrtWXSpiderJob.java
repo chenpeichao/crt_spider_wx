@@ -46,7 +46,7 @@ public class CrtWXSpiderJob {
         }
     }
 
-    //    @Scheduled(fixedRate = 1000*5)
+    //    @Scheduled(fixedRate = 1000*60*50)
     @Scheduled(cron = "0 0 * * * ?")
     public void addTask() {
         logger.info("GsdataPushOriginNewsKeywordsSpider start");
