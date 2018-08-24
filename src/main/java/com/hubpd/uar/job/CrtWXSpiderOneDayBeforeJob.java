@@ -1,5 +1,6 @@
 package com.hubpd.uar.job;
 
+import com.hubpd.uar.common.utils.DateUtils;
 import com.hubpd.uar.domain.CbWxContent;
 import com.hubpd.uar.domain.CbWxList;
 import com.hubpd.uar.service.CbWxContentService;
@@ -24,7 +25,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * 每天定点定时回溯前一天的公众号全量数据
+ * 每天定点定时回溯公众号全量数据
  *
  * @author cpc
  * @create 2018-08-23 20:44
@@ -39,15 +40,32 @@ public class CrtWXSpiderOneDayBeforeJob {
     private CbWxContentService cbWxContentService;
 
     /**
-     * 每天10点30分，定时回溯当天整天数据
+     * 定时任务，每天3:30回溯抓取昨天全量数据
      */
-//    @Scheduled(fixedRate = 1000*60*50)
-    @Scheduled(cron = "0 30 22 * * ?")
+    @Scheduled(cron = "0 30 3 * * ?")
     public void getOneDayBeforeArticleInfo() {
+        executeGetArticleInfo(org.apache.commons.lang3.time.DateUtils.addDays(new Date(), -1), "3:30");
+    }
+
+    /**
+     * 定时任务，每天22:30回溯抓取今天全量数据
+     */
+    @Scheduled(cron = "0 30 22 * * ?")
+    public void getCurrentDayArticleInfo() {
+        executeGetArticleInfo(new Date(), "22:30");
+    }
+
+    /**
+     * 按照传递参数定时抓取文章全量数据
+     *
+     * @param searchDate  查询时间
+     * @param dateLogFlag 日志记录是时间标识
+     */
+    public void executeGetArticleInfo(Date searchDate, String dateLogFlag) {
         List<CbWxList> gsDataCbWxListList = cbWxListService.findAll(null, 0);
         for (CbWxList cbWxList : gsDataCbWxListList) {
             String gsdataNickNameId = null;   //定义清博识别的微信公众号标识
-            Date backDay = new Date();
+            Date backDay = searchDate;
             //用于日期流转变化的日期标识
             List<CbWxContent> cbWxContentList = new ArrayList<CbWxContent>();
             //1、获取查询的微信id在清博库中的nickname_id
@@ -61,12 +79,13 @@ public class CrtWXSpiderOneDayBeforeJob {
                 List<WxUrlMonitorResult> results = new ArrayList<WxUrlMonitorResult>();
                 // 获取公众号文章数据
                 try {
+                    //判断当前时间是3:30则重跑昨天的数据，如果是22:30则重新跑今天的数据
                     results = DataApi.getInstance().getResponseData(pageNo,
                             gsdataNickNameId,
                             backDay,
                             backDay);
                 } catch (Exception e) {
-                    logger.error("公众号【" + cbWxList.getNickname() + "---" + cbWxList.getNicknameId() + "】" + new SimpleDateFormat("yyyy-MM-dd").format(backDay) + "10:30的数据回溯任务抓取异常！！", e);
+                    logger.error("公众号【" + cbWxList.getNickname() + "---" + cbWxList.getNicknameId() + "】" + new SimpleDateFormat("yyyy-MM-dd").format(backDay) + dateLogFlag + "的数据回溯任务抓取异常！！", e);
                 }
 
                 // 获取结果
@@ -134,9 +153,9 @@ public class CrtWXSpiderOneDayBeforeJob {
             //每个公众号的文章批量保存
             if (cbWxContentList.size() > 0) {
                 cbWxContentService.save(cbWxContentList);
-                logger.info("公众号【" + cbWxList.getNickname() + "(" + cbWxList.getNicknameId() + ")】在【" + com.hubpd.uar.common.utils.DateUtils.parseDate2StringByPattern(backDay, "yyyy-MM-dd") + "22:30回溯抓取了【" + cbWxContentList.size() + "】篇文章");
+                logger.info("公众号【" + cbWxList.getNickname() + "(" + cbWxList.getNicknameId() + ")】在【" + com.hubpd.uar.common.utils.DateUtils.parseDate2StringByPattern(backDay, "yyyy-MM-dd") + dateLogFlag + "回溯抓取了【" + cbWxContentList.size() + "】篇文章");
             } else {
-                logger.info("公众号【" + cbWxList.getNickname() + "(" + cbWxList.getNicknameId() + ")】在【" + com.hubpd.uar.common.utils.DateUtils.parseDate2StringByPattern(backDay, "yyyy-MM-dd") + "22:30回溯未抓取到新文章！");
+                logger.info("公众号【" + cbWxList.getNickname() + "(" + cbWxList.getNicknameId() + ")】在【" + com.hubpd.uar.common.utils.DateUtils.parseDate2StringByPattern(backDay, "yyyy-MM-dd") + dateLogFlag + "回溯未抓取到新文章！");
             }
         }
     }
